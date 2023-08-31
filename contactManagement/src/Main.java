@@ -58,7 +58,10 @@ public class Main {
                 String name = parts[0];
                 String phoneNumber = parts[1];
                 String emailAddress = parts[2];
-                contacts.add(new Contact(name, phoneNumber, emailAddress));
+                Contact contact = new Contact(name);
+                contact.addPhoneNumber(phoneNumber);
+                contact.addEmailAddress(emailAddress);
+                contacts.add(contact);
             }
             System.out.println("Contacts loaded successfully.");
         } catch (IOException e) {
@@ -69,8 +72,17 @@ public class Main {
     private static void saveContactsToFile() {
         try (BufferedWriter writer = new BufferedWriter(new FileWriter(FILENAME))) {
             for (Contact contact : contacts) {
-                writer.write(contact.getName() + "," + contact.getPhoneNumber() + "," + contact.getEmailAddress());
-                writer.newLine();
+                String name = contact.getName();
+                List<String> phoneNumbers = contact.getPhoneNumbers();
+                List<String> emailAddresses = contact.getEmailAddresses();
+
+                for (int i = 0; i < phoneNumbers.size() || i < emailAddresses.size(); i++) {
+                    String phoneNumber = (i < phoneNumbers.size()) ? phoneNumbers.get(i) : "";
+                    String emailAddress = (i < emailAddresses.size()) ? emailAddresses.get(i) : "";
+
+                    writer.write(name + "," + phoneNumber + "," + emailAddress);
+                    writer.newLine();
+                }
             }
             System.out.println("Contacts saved successfully.");
         } catch (IOException e) {
@@ -81,11 +93,28 @@ public class Main {
     private static void addContact() {
         System.out.print("Enter name: ");
         String name = scanner.nextLine();
-        System.out.print("Enter phone number: ");
-        String phoneNumber = scanner.nextLine();
-        System.out.print("Enter email address: ");
-        String emailAddress = scanner.nextLine();
-        contacts.add(new Contact(name, phoneNumber, emailAddress));
+
+        Contact contact = new Contact(name);
+
+        while (true) {
+            System.out.print("Enter phone number (or 'done' to finish): ");
+            String phoneNumber = scanner.nextLine();
+            if (phoneNumber.equalsIgnoreCase("done")) {
+                break;
+            }
+            contact.addPhoneNumber(phoneNumber);
+        }
+
+        while (true) {
+            System.out.print("Enter email address (or 'done' to finish): ");
+            String emailAddress = scanner.nextLine();
+            if (emailAddress.equalsIgnoreCase("done")) {
+                break;
+            }
+            contact.addEmailAddress(emailAddress);
+        }
+
+        contacts.add(contact);
         System.out.println("Contact added successfully.");
     }
 
@@ -135,10 +164,10 @@ public class Main {
         System.out.print("Enter new email address: ");
         String newEmailAddress = scanner.nextLine();
         Contact updatedContact = new Contact(
-                contacts.get(indexToUpdate).getName(),
-                newPhoneNumber,
-                newEmailAddress
+                contacts.get(indexToUpdate).getName()
         );
+        updatedContact.addPhoneNumber(newPhoneNumber);
+        updatedContact.addEmailAddress(newEmailAddress);
         contacts.set(indexToUpdate, updatedContact);
         System.out.println("Contact updated successfully.");
     }
